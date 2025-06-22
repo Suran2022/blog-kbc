@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useContributorStore } from '../../store/contributor';
 import { ElMessageBox } from 'element-plus';
+import { User, Star, ArrowRight } from '@element-plus/icons-vue';
 
 const props = defineProps({
   title: {
@@ -66,8 +67,10 @@ onMounted(() => {
 
 <template>
   <div class="contributor-list-container">
-    <h3 class="contributor-list-title">{{ title }}</h3>
-    <el-divider />
+    <h3 class="contributor-list-title">
+      <el-icon><User /></el-icon>
+      {{ title }}
+    </h3>
     <el-skeleton :rows="limit" animated v-if="loading" />
     <div v-else-if="contributorStore.contributors.length > 0" class="contributor-list">
       <div 
@@ -76,11 +79,17 @@ onMounted(() => {
         class="contributor-item"
         @click="showContributorDetail(contributor)"
       >
-        <el-avatar :size="40" :src="contributor.avatar" class="contributor-avatar" />
+        <el-avatar :size="44" :src="contributor.avatar" class="contributor-avatar">
+          <el-icon><User /></el-icon>
+        </el-avatar>
         <div class="contributor-info">
           <div class="contributor-name">{{ contributor.name }}</div>
-          <div class="contributor-role">{{ contributor.role }}</div>
+          <div class="contributor-role">
+            <el-icon class="role-icon"><Star /></el-icon>
+            {{ contributor.role }}
+          </div>
         </div>
+        <el-icon class="arrow-icon"><ArrowRight /></el-icon>
       </div>
     </div>
     <el-empty v-else description="暂无贡献者" :image-size="60" />
@@ -106,9 +115,12 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #32325d;
-  margin: 0 0 12px 0;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: relative;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
 }
 
 .contributor-list-title::after {
@@ -122,6 +134,11 @@ onMounted(() => {
   border-radius: 3px;
 }
 
+.contributor-list-title .el-icon {
+  color: #5e72e4;
+  font-size: 20px;
+}
+
 .contributor-list {
   display: flex;
   flex-direction: column;
@@ -131,26 +148,32 @@ onMounted(() => {
 .contributor-item {
   display: flex;
   align-items: center;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
 }
 
 .contributor-item:hover {
-  background-color: rgba(94, 114, 228, 0.05);
-  transform: translateX(3px);
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-color: rgba(94, 114, 228, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(94, 114, 228, 0.1);
 }
 
 .contributor-avatar {
   margin-right: 12px;
   border: 2px solid rgba(94, 114, 228, 0.2);
   transition: all 0.3s ease;
+  background: linear-gradient(135deg, #5e72e4, #825ee4);
 }
 
 .contributor-item:hover .contributor-avatar {
   border-color: rgba(94, 114, 228, 0.5);
   transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(94, 114, 228, 0.3);
 }
 
 .contributor-info {
@@ -172,6 +195,28 @@ onMounted(() => {
 .contributor-role {
   font-size: 12px;
   color: #8898aa;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.role-icon {
+  font-size: 12px;
+  color: #ffd700;
+}
+
+.arrow-icon {
+  font-size: 16px;
+  color: #8898aa;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.contributor-item:hover .arrow-icon {
+  opacity: 1;
+  transform: translateX(0);
+  color: #5e72e4;
 }
 
 /* 贡献者详情弹窗样式 */

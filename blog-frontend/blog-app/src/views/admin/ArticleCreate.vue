@@ -9,12 +9,12 @@ const router = useRouter();
 // 处理保存成功
 const handleSaveSuccess = () => {
   ElMessage.success('文章创建成功');
-  router.push({ name: 'ArticleManagement' });
+  router.push({ name: 'ArticleList' });
 };
 
 // 处理取消
 const handleCancel = () => {
-  router.push({ name: 'ArticleManagement' });
+  router.push({ name: 'ArticleList' });
 };
 </script>
 

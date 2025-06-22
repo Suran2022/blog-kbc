@@ -70,4 +70,34 @@ public interface ArticleService {
      * @return 热门文章列表
      */
     List<ArticleVO> getPopularArticles(Integer limit);
+
+    /**
+     * 搜索文章
+     *
+     * @param keyword 搜索关键词
+     * @param tag     标签
+     * @param page    页码
+     * @param size    每页数量
+     * @param sortBy  排序字段
+     * @param sortDir 排序方向
+     * @return 搜索结果
+     */
+    PageResult<ArticleVO> searchArticles(String keyword, String tag, Integer page, Integer size, String sortBy, String sortDir);
+
+    /**
+     * 获取搜索建议
+     *
+     * @param keyword 关键词前缀
+     * @param limit   建议数量
+     * @return 搜索建议列表
+     */
+    List<String> getSearchSuggestions(String keyword, Integer limit);
+
+    /**
+     * 获取热门搜索关键词
+     *
+     * @param limit 数量限制
+     * @return 热门搜索关键词列表
+     */
+    List<String> getHotSearchKeywords(Integer limit);
 }

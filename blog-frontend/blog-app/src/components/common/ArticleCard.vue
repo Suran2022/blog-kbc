@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { formatDate } from '../../utils';
+import { Calendar, Collection, View, ArrowRight } from '@element-plus/icons-vue';
+import HighlightText from './HighlightText.vue';
 
 const props = defineProps({
   article: {
@@ -11,6 +13,10 @@ const props = defineProps({
   showSummary: {
     type: Boolean,
     default: true
+  },
+  searchKeyword: {
+    type: String,
+    default: ''
   }
 });
 
@@ -33,7 +39,9 @@ const goToDetail = () => {
 <template>
   <div class="article-card" @click="goToDetail" style="background-color: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 20px; margin-bottom: 20px; transition: all 0.2s; cursor: pointer; border-left: 3px solid #4a90e2;">
     <div class="article-card-header">
-      <h2 class="article-title" style="font-size: 18px; font-weight: bold; color: #333; margin: 0 0 10px 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">{{ article.title }}</h2>
+      <h2 class="article-title" style="font-size: 18px; font-weight: bold; color: #333; margin: 0 0 10px 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+        <HighlightText :text="article.title" :keyword="searchKeyword" />
+      </h2>
       <div class="article-meta">
         <span class="article-date">
           <el-icon><Calendar /></el-icon>
@@ -51,7 +59,7 @@ const goToDetail = () => {
     </div>
     
     <div v-if="showSummary && article.summary" class="article-summary">
-      {{ article.summary }}
+      <HighlightText :text="article.summary" :keyword="searchKeyword" />
     </div>
     
     <div class="article-footer">

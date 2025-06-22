@@ -141,4 +141,50 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
      */
     @Query(value = "SELECT a FROM Article a WHERE a.status = 1 ORDER BY a.viewCount DESC LIMIT :limit", nativeQuery = true)
     List<Article> findPopularArticles(@Param("limit") Integer limit);
+
+    /**
+     * 根据标题、内容、摘要模糊查询文章列表
+     *
+     * @param title    标题关键词
+     * @param content  内容关键词
+     * @param summary  摘要关键词
+     * @param status   状态
+     * @param pageable 分页参数
+     * @return 文章列表
+     */
+    Page<Article> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrSummaryContainingIgnoreCaseAndStatus(
+            String title, String content, String summary, Integer status, Pageable pageable);
+
+    /**
+     * 根据标签查询文章列表
+     *
+     * @param tag      标签
+     * @param status   状态
+     * @param pageable 分页参数
+     * @return 文章列表
+     */
+    Page<Article> findByTagsContainingIgnoreCaseAndStatus(String tag, Integer status, Pageable pageable);
+
+    /**
+     * 根据标题和标签查询文章列表
+     *
+     * @param title    标题关键词
+     * @param tag      标签
+     * @param status   状态
+     * @param pageable 分页参数
+     * @return 文章列表
+     */
+    Page<Article> findByTitleContainingIgnoreCaseAndTagsContainingIgnoreCaseAndStatus(
+            String title, String tag, Integer status, Pageable pageable);
+
+    /**
+     * 根据标题查询文章列表（用于搜索建议）
+     *
+     * @param title    标题关键词
+     * @param status   状态
+     * @param pageable 分页参数
+     * @return 文章列表
+     */
+    List<Article> findByTitleContainingIgnoreCaseAndStatusOrderByViewCountDesc(
+            String title, Integer status, Pageable pageable);
 }

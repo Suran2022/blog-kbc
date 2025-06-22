@@ -71,6 +71,12 @@ public class Article implements Serializable {
     private Integer viewCount;
 
     /**
+     * 标签（多个标签用逗号分隔）
+     */
+    @Column(name = "tags", length = 500)
+    private String tags;
+
+    /**
      * 状态：0-草稿，1-已发布
      */
     @Column(name = "status", columnDefinition = "tinyint default 1")

@@ -52,10 +52,40 @@ public class Setting implements Serializable {
     private String siteFavicon;
 
     /**
+     * 网站关键词
+     */
+    @Column(name = "site_keywords", length = 500)
+    private String siteKeywords;
+
+    /**
+     * 网站备案号
+     */
+    @Column(name = "site_icp", length = 100)
+    private String siteIcp;
+
+    /**
+     * 联系邮箱
+     */
+    @Column(name = "site_email", length = 100)
+    private String siteEmail;
+
+    /**
      * 底部信息
      */
     @Column(name = "footer_info", columnDefinition = "text")
     private String footerInfo;
+
+    /**
+     * 是否允许评论
+     */
+    @Column(name = "allow_comments", nullable = false)
+    private Boolean allowComments = true;
+
+    /**
+     * 评论是否需要审核
+     */
+    @Column(name = "comment_audit", nullable = false)
+    private Boolean commentAudit = true;
 
     /**
      * 创建时间

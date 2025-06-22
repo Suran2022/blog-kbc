@@ -7,7 +7,7 @@ import request from '../utils/request';
  */
 export function uploadFile(formData) {
   return request({
-    url: '/admin/upload',
+    url: '/files',
     method: 'post',
     data: formData,
     headers: {
@@ -23,7 +23,7 @@ export function uploadFile(formData) {
  */
 export function uploadImage(formData) {
   return request({
-    url: '/admin/upload/image',
+    url: '/files/images',
     method: 'post',
     data: formData,
     headers: {

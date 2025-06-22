@@ -49,6 +49,12 @@ public class ArticleDTO implements Serializable {
     private Long categoryId;
 
     /**
+     * 标签（多个标签用逗号分隔）
+     */
+    @Size(max = 500, message = "标签长度不能超过500个字符")
+    private String tags;
+
+    /**
      * 状态：0-草稿，1-已发布
      */
     private Integer status = 1;

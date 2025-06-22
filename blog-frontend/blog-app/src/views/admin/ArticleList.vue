@@ -210,12 +210,12 @@ const handleReset = () => {
 
 // 新建文章
 const handleCreate = () => {
-  router.push('/admin/article/create')
+  router.push('/admin/articles/create')
 }
 
 // 编辑文章
 const handleEdit = (row) => {
-  router.push(`/admin/article/edit/${row.id}`)
+  router.push(`/admin/articles/edit/${row.id}`)
 }
 
 // 预览文章

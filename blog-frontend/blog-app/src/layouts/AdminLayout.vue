@@ -25,7 +25,7 @@ const menuItems = [
     icon: 'Document',
     title: '文章管理',
     index: '/admin/articles',
-    route: { name: 'ArticleManagement' }
+    route: { name: 'ArticleList' }
   },
   {
     icon: 'Collection',

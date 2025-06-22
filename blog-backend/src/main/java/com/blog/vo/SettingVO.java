@@ -41,9 +41,34 @@ public class SettingVO implements Serializable {
     private String siteFavicon;
 
     /**
+     * 网站关键词
+     */
+    private String siteKeywords;
+
+    /**
+     * 网站备案号
+     */
+    private String siteIcp;
+
+    /**
+     * 联系邮箱
+     */
+    private String siteEmail;
+
+    /**
      * 底部信息
      */
     private String footerInfo;
+
+    /**
+     * 是否允许评论
+     */
+    private Boolean allowComments;
+
+    /**
+     * 评论是否需要审核
+     */
+    private Boolean commentAudit;
 
     /**
      * 创建时间

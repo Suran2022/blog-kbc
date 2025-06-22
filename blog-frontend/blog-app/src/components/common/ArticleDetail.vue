@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { formatDate } from '../../utils';
+import { Calendar, Collection, View } from '@element-plus/icons-vue';
 
 const props = defineProps({
   article: {
@@ -81,23 +82,44 @@ const goToTagArticles = (tag) => {
 <style scoped>
 .article-detail {
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(94, 114, 228, 0.08);
+  padding: 40px;
+  transition: all 0.3s ease;
+}
+
+.article-detail:hover {
+  box-shadow: 0 8px 25px rgba(94, 114, 228, 0.12);
 }
 
 .article-header {
-  margin-bottom: 30px;
-  border-bottom: 1px solid #ebeef5;
-  padding-bottom: 20px;
+  margin-bottom: 40px;
+  border-bottom: 2px solid #f0f2f5;
+  padding-bottom: 25px;
+  position: relative;
+}
+
+.article-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, #5e72e4, #825ee4);
+  border-radius: 2px;
 }
 
 .article-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
-  margin: 0 0 15px 0;
-  line-height: 1.4;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+  line-height: 1.3;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .article-meta {
@@ -105,17 +127,27 @@ const goToTagArticles = (tag) => {
   align-items: center;
   flex-wrap: wrap;
   font-size: 14px;
-  color: #909399;
+  color: #6c757d;
+  gap: 24px;
 }
 
 .article-meta span {
   display: flex;
   align-items: center;
-  margin-right: 20px;
+  padding: 6px 12px;
+  background: rgba(94, 114, 228, 0.05);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.article-meta span:hover {
+  background: rgba(94, 114, 228, 0.1);
+  transform: translateY(-1px);
 }
 
 .article-meta .el-icon {
-  margin-right: 4px;
+  margin-right: 6px;
+  color: #5e72e4;
 }
 
 .article-category {
@@ -130,8 +162,9 @@ const goToTagArticles = (tag) => {
 .article-content {
   font-size: 16px;
   line-height: 1.8;
-  color: #303133;
-  margin-bottom: 30px;
+  color: #2c3e50;
+  margin-bottom: 40px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .article-content :deep(img) {
@@ -142,19 +175,34 @@ const goToTagArticles = (tag) => {
 }
 
 .article-content :deep(pre) {
-  background-color: #f5f7fa;
-  padding: 15px;
-  border-radius: 4px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 20px;
+  border-radius: 8px;
   overflow-x: auto;
-  margin: 15px 0;
+  margin: 20px 0;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .article-content :deep(blockquote) {
-  border-left: 4px solid #409EFF;
-  padding: 10px 15px;
-  color: #606266;
-  background-color: #f5f7fa;
-  margin: 15px 0;
+  border-left: 4px solid #5e72e4;
+  padding: 15px 20px;
+  color: #495057;
+  background: linear-gradient(135deg, rgba(94, 114, 228, 0.05), rgba(94, 114, 228, 0.02));
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+  position: relative;
+  font-style: italic;
+}
+
+.article-content :deep(blockquote::before) {
+  content: '"';
+  font-size: 48px;
+  color: #5e72e4;
+  position: absolute;
+  top: -10px;
+  left: 15px;
+  opacity: 0.3;
 }
 
 .article-content :deep(h1),
@@ -199,23 +247,39 @@ const goToTagArticles = (tag) => {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  padding-top: 20px;
-  border-top: 1px solid #ebeef5;
+  padding-top: 25px;
+  border-top: 2px solid #f0f2f5;
+  gap: 12px;
 }
 
 .tags-label {
-  margin-right: 10px;
-  color: #606266;
+  color: #495057;
   font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.tags-label::before {
+  content: '#';
+  color: #5e72e4;
+  font-weight: bold;
+  margin-right: 4px;
 }
 
 .article-tag {
-  margin-right: 10px;
-  margin-bottom: 5px;
   cursor: pointer;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .article-tag:hover {
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #5e72e4, #825ee4);
+  color: white;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(94, 114, 228, 0.3);
+  border-color: transparent;
 }
 </style>

@@ -69,8 +69,52 @@ const totalPages = computed(() => {
 
 <style scoped>
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 30px;
   display: flex;
   justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(94, 114, 228, 0.05), rgba(94, 114, 228, 0.02));
+  border-radius: 12px;
+  border: 1px solid rgba(94, 114, 228, 0.08);
+}
+
+.pagination-container :deep(.el-pagination) {
+  background: transparent;
+}
+
+.pagination-container :deep(.el-pagination .el-pager li) {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(94, 114, 228, 0.1);
+  border-radius: 8px;
+  margin: 0 4px;
+  transition: all 0.3s ease;
+}
+
+.pagination-container :deep(.el-pagination .el-pager li:hover) {
+  background: rgba(94, 114, 228, 0.1);
+  border-color: rgba(94, 114, 228, 0.3);
+  transform: translateY(-1px);
+}
+
+.pagination-container :deep(.el-pagination .el-pager li.is-active) {
+  background: linear-gradient(135deg, #5e72e4, #825ee4);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 12px rgba(94, 114, 228, 0.3);
+}
+
+.pagination-container :deep(.el-pagination .btn-prev),
+.pagination-container :deep(.el-pagination .btn-next) {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(94, 114, 228, 0.1);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.pagination-container :deep(.el-pagination .btn-prev:hover),
+.pagination-container :deep(.el-pagination .btn-next:hover) {
+  background: rgba(94, 114, 228, 0.1);
+  border-color: rgba(94, 114, 228, 0.3);
+  transform: translateY(-1px);
 }
 </style>

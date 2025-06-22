@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useSettingStore } from '../../store/setting';
+import { uploadImage } from '../../api/upload';
+import { ElMessage } from 'element-plus';
 
 const emit = defineEmits(['save-success']);
 
@@ -11,7 +13,7 @@ const settingForm = ref({
   siteName: '',
   siteDescription: '',
   siteKeywords: '',
-  siteFooter: '',
+  footerInfo: '',
   siteLogo: '',
   siteIcp: '',
   siteEmail: '',
@@ -47,7 +49,7 @@ const fetchSettings = async () => {
         siteName: settings.siteName || '',
         siteDescription: settings.siteDescription || '',
         siteKeywords: settings.siteKeywords || '',
-        siteFooter: settings.siteFooter || '',
+        footerInfo: settings.footerInfo || '',
         siteLogo: settings.siteLogo || '',
         siteIcp: settings.siteIcp || '',
         siteEmail: settings.siteEmail || '',
@@ -64,14 +66,37 @@ const fetchSettings = async () => {
 };
 
 // 上传Logo
-const handleLogoUpload = (file) => {
-  // 这里应该调用实际的上传API
-  // 模拟上传成功
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
-  reader.onload = () => {
-    settingForm.value.siteLogo = reader.result;
-  };
+const handleLogoUpload = async (file) => {
+  // 检查文件类型
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    ElMessage.error('只支持 JPG、PNG、GIF、WebP 格式的图片');
+    return false;
+  }
+  
+  // 检查文件大小（限制为2MB）
+  const maxSize = 2 * 1024 * 1024;
+  if (file.size > maxSize) {
+    ElMessage.error('图片大小不能超过2MB');
+    return false;
+  }
+  
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await uploadImage(formData);
+    if (response.code === 200) {
+      settingForm.value.siteLogo = response.data;
+      ElMessage.success('Logo上传成功');
+    } else {
+      ElMessage.error(response.message || 'Logo上传失败');
+    }
+  } catch (error) {
+    console.error('Logo上传失败:', error);
+    ElMessage.error('Logo上传失败，请稍后重试');
+  }
+  
   return false; // 阻止默认上传行为
 };
 
@@ -170,7 +195,7 @@ onMounted(() => {
         <el-tab-pane label="页脚设置">
           <el-form-item label="页脚信息">
             <el-input
-              v-model="settingForm.siteFooter"
+              v-model="settingForm.footerInfo"
               type="textarea"
               :rows="3"
               placeholder="请输入页脚信息（支持HTML）"

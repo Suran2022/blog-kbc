@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCategoryStore } from '../../store/category';
+import { Collection, Folder, ArrowRight } from '@element-plus/icons-vue';
 
 const props = defineProps({
   title: {
@@ -41,8 +42,10 @@ onMounted(() => {
 
 <template>
   <div class="category-list-container">
-    <h3 class="category-list-title">{{ title }}</h3>
-    <el-divider />
+    <h3 class="category-list-title">
+      <el-icon><Collection /></el-icon>
+      {{ title }}
+    </h3>
     <el-skeleton :rows="5" animated v-if="loading" />
     <div v-else-if="categoryStore.categories.length > 0" class="category-list">
       <div 
@@ -51,12 +54,20 @@ onMounted(() => {
         class="category-item"
         @click="goToCategoryArticles(category.id)"
       >
-        <el-tag :type="category.type || 'info'" effect="plain">
-          {{ category.name }}
-          <span class="category-count" v-if="category.articleCount !== undefined">
-            ({{ category.articleCount }})
-          </span>
-        </el-tag>
+        <div class="category-card">
+          <div class="category-icon">
+            <el-icon><Folder /></el-icon>
+          </div>
+          <div class="category-content">
+            <div class="category-name">{{ category.name }}</div>
+            <div class="category-count" v-if="category.articleCount !== undefined">
+              {{ category.articleCount }} 篇文章
+            </div>
+          </div>
+          <div class="category-arrow">
+            <el-icon><ArrowRight /></el-icon>
+          </div>
+        </div>
       </div>
     </div>
     <el-empty v-else description="暂无分类" :image-size="60" />
@@ -82,9 +93,12 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #32325d;
-  margin: 0 0 12px 0;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: relative;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
 }
 
 .category-list-title::after {
@@ -98,36 +112,104 @@ onMounted(() => {
   border-radius: 3px;
 }
 
+.category-list-title .el-icon {
+  color: #5e72e4;
+  font-size: 20px;
+}
+
 .category-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .category-item {
   cursor: pointer;
-  transition: all 0.3s;
-  margin-bottom: 5px;
-}
-
-.category-item:hover {
-  transform: translateY(-2px);
-}
-
-.category-item .el-tag {
   transition: all 0.3s ease;
-  font-size: 13px;
-  padding: 0 12px;
-  height: 28px;
-  line-height: 28px;
 }
 
-.category-item:hover .el-tag {
-  box-shadow: 0 3px 8px rgba(94, 114, 228, 0.2);
+.category-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.category-item:hover .category-card {
+  background: linear-gradient(135deg, #5e72e4, #825ee4);
+  color: white;
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(94, 114, 228, 0.3);
+}
+
+.category-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(94, 114, 228, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  transition: all 0.3s ease;
+}
+
+.category-item:hover .category-icon {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.category-icon .el-icon {
+  color: #5e72e4;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+.category-item:hover .category-icon .el-icon {
+  color: white;
+}
+
+.category-content {
+  flex: 1;
+}
+
+.category-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #32325d;
+  margin-bottom: 2px;
+  transition: color 0.3s ease;
+}
+
+.category-item:hover .category-name {
+  color: white;
 }
 
 .category-count {
   font-size: 12px;
-  margin-left: 2px;
+  color: #8898aa;
+  transition: color 0.3s ease;
+}
+
+.category-item:hover .category-count {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.category-arrow {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+}
+
+.category-item:hover .category-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.category-arrow .el-icon {
+  color: white;
+  font-size: 14px;
 }
 </style>

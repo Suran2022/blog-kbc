@@ -27,9 +27,14 @@ public class SettingServiceImpl implements SettingService {
                     Setting defaultSetting = new Setting();
                     defaultSetting.setSiteName("博客系统");
                     defaultSetting.setSiteDescription("一个简单的博客系统");
+                    defaultSetting.setSiteKeywords("博客,技术,生活,编程");
                     defaultSetting.setSiteLogo("/uploads/default-logo.png");
                     defaultSetting.setSiteFavicon("/uploads/default-favicon.ico");
+                    defaultSetting.setSiteIcp("");
+                    defaultSetting.setSiteEmail("admin@example.com");
                     defaultSetting.setFooterInfo("© 2023 博客系统 版权所有");
+                    defaultSetting.setAllowComments(true);
+                    defaultSetting.setCommentAudit(true);
                     return settingRepository.save(defaultSetting);
                 });
 
@@ -50,14 +55,29 @@ public class SettingServiceImpl implements SettingService {
         if (settingDTO.getSiteDescription() != null) {
             setting.setSiteDescription(settingDTO.getSiteDescription());
         }
+        if (settingDTO.getSiteKeywords() != null) {
+            setting.setSiteKeywords(settingDTO.getSiteKeywords());
+        }
         if (settingDTO.getSiteLogo() != null) {
             setting.setSiteLogo(settingDTO.getSiteLogo());
         }
         if (settingDTO.getSiteFavicon() != null) {
             setting.setSiteFavicon(settingDTO.getSiteFavicon());
         }
+        if (settingDTO.getSiteIcp() != null) {
+            setting.setSiteIcp(settingDTO.getSiteIcp());
+        }
+        if (settingDTO.getSiteEmail() != null) {
+            setting.setSiteEmail(settingDTO.getSiteEmail());
+        }
         if (settingDTO.getFooterInfo() != null) {
             setting.setFooterInfo(settingDTO.getFooterInfo());
+        }
+        if (settingDTO.getAllowComments() != null) {
+            setting.setAllowComments(settingDTO.getAllowComments());
+        }
+        if (settingDTO.getCommentAudit() != null) {
+            setting.setCommentAudit(settingDTO.getCommentAudit());
         }
 
         // 保存系统设置
@@ -77,9 +97,14 @@ public class SettingServiceImpl implements SettingService {
                 .id(setting.getId())
                 .siteName(setting.getSiteName())
                 .siteDescription(setting.getSiteDescription())
+                .siteKeywords(setting.getSiteKeywords())
                 .siteLogo(setting.getSiteLogo())
                 .siteFavicon(setting.getSiteFavicon())
+                .siteIcp(setting.getSiteIcp())
+                .siteEmail(setting.getSiteEmail())
                 .footerInfo(setting.getFooterInfo())
+                .allowComments(setting.getAllowComments())
+                .commentAudit(setting.getCommentAudit())
                 .createTime(setting.getCreateTime())
                 .updateTime(setting.getUpdateTime())
                 .build();

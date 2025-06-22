@@ -48,6 +48,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setTitle(articleDTO.getTitle());
         article.setContent(articleDTO.getContent());
         article.setSummary(articleDTO.getSummary());
+        article.setTags(articleDTO.getTags());
         article.setThumbnail(articleDTO.getThumbnail());
         article.setCategoryId(articleDTO.getCategoryId());
         article.setCategory(category);
@@ -84,6 +85,9 @@ public class ArticleServiceImpl implements ArticleService {
         }
         if (articleDTO.getSummary() != null) {
             article.setSummary(articleDTO.getSummary());
+        }
+        if (articleDTO.getTags() != null) {
+            article.setTags(articleDTO.getTags());
         }
         if (articleDTO.getThumbnail() != null) {
             article.setThumbnail(articleDTO.getThumbnail());
@@ -173,7 +177,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .collect(Collectors.toList());
 
         // 创建分页结果
-        return new PageResult<>(page, size, articlePage.getTotalElements(), articleVOList);
+        return PageResult.of(page, size, articlePage.getTotalElements(), articleVOList);
     }
 
     @Override
@@ -198,6 +202,67 @@ public class ArticleServiceImpl implements ArticleService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public PageResult<ArticleVO> searchArticles(String keyword, String tag, Integer page, Integer size, String sortBy, String sortDir) {
+        // 创建分页对象
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        
+        Page<Article> articlePage;
+        
+        // 根据搜索条件查询
+        if (StringUtils.hasText(keyword) && StringUtils.hasText(tag)) {
+            // 同时按关键词和标签搜索
+            articlePage = articleRepository.findByTitleContainingIgnoreCaseAndTagsContainingIgnoreCaseAndStatus(
+                    keyword, tag, 1, pageable);
+        } else if (StringUtils.hasText(keyword)) {
+            // 按关键词搜索（标题、内容、摘要）
+            articlePage = articleRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrSummaryContainingIgnoreCaseAndStatus(
+                    keyword, keyword, keyword, 1, pageable);
+        } else if (StringUtils.hasText(tag)) {
+            // 按标签搜索
+            articlePage = articleRepository.findByTagsContainingIgnoreCaseAndStatus(tag, 1, pageable);
+        } else {
+            // 无搜索条件，返回所有已发布文章
+            articlePage = articleRepository.findByStatus(1, pageable);
+        }
+        
+        // 转换为VO
+        List<ArticleVO> articleVOList = articlePage.getContent().stream()
+                .map(this::convertToVO)
+                .collect(Collectors.toList());
+        
+        return PageResult.of(page, size, articlePage.getTotalElements(), articleVOList);
+    }
+    
+    @Override
+    public List<String> getSearchSuggestions(String keyword, Integer limit) {
+        if (!StringUtils.hasText(keyword)) {
+            return List.of();
+        }
+        
+        // 从文章标题中获取建议
+        List<Article> articles = articleRepository.findByTitleContainingIgnoreCaseAndStatusOrderByViewCountDesc(
+                keyword, 1, PageRequest.of(0, limit));
+        
+        return articles.stream()
+                .map(Article::getTitle)
+                .distinct()
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<String> getHotSearchKeywords(Integer limit) {
+        // 这里可以从搜索日志表中获取热门关键词
+        // 暂时返回一些模拟数据
+        return List.of(
+                "Vue.js", "Spring Boot", "JavaScript", "React", "Node.js",
+                "TypeScript", "Java", "Python", "Docker", "Kubernetes"
+        ).stream().limit(limit).collect(Collectors.toList());
+    }
+
     /**
      * 将文章实体转换为VO
      *
@@ -214,6 +279,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .categoryId(article.getCategoryId())
                 .categoryName(article.getCategory() != null ? article.getCategory().getName() : null)
                 .viewCount(article.getViewCount())
+                .tags(article.getTags())
                 .status(article.getStatus())
                 .createTime(article.getCreateTime())
                 .updateTime(article.getUpdateTime())

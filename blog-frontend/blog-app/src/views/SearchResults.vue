@@ -105,14 +105,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Calendar, View, Folder, Search } from '@element-plus/icons-vue'
-import SearchBox from '../../components/common/SearchBox.vue'
-import SearchSuggestions from '../../components/common/SearchSuggestions.vue'
-import { searchArticles } from '../../api/search'
-import { formatDate } from '../../utils/date'
+import SearchBox from '@/components/common/SearchBox.vue'
+import SearchSuggestions from '@/components/common/SearchSuggestions.vue'
+import { searchArticles } from '@/api/search'
+import { formatDate } from '@/utils/date'
 
 const route = useRoute()
 const router = useRouter()
@@ -175,7 +175,7 @@ const handleSearch = (newKeyword) => {
   
   // 更新URL
   router.push({
-    name: 'SearchResult',
+    name: 'SearchResults',
     query: { keyword: newKeyword }
   })
 }

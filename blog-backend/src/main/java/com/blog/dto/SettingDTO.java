@@ -41,7 +41,35 @@ public class SettingDTO implements Serializable {
     private String siteFavicon;
 
     /**
+     * 网站关键词
+     */
+    @Size(max = 500, message = "网站关键词长度不能超过500个字符")
+    private String siteKeywords;
+
+    /**
+     * 网站备案号
+     */
+    @Size(max = 100, message = "网站备案号长度不能超过100个字符")
+    private String siteIcp;
+
+    /**
+     * 联系邮箱
+     */
+    @Size(max = 100, message = "联系邮箱长度不能超过100个字符")
+    private String siteEmail;
+
+    /**
      * 底部信息
      */
     private String footerInfo;
+
+    /**
+     * 是否允许评论
+     */
+    private Boolean allowComments;
+
+    /**
+     * 评论是否需要审核
+     */
+    private Boolean commentAudit;
 }

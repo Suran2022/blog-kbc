@@ -115,7 +115,7 @@ onMounted(() => {
       <template #header>
         <div class="card-header">
           <span>最近发布的文章</span>
-          <el-button type="primary" link @click="$router.push({ name: 'ArticleManagement' })">
+          <el-button type="primary" link @click="$router.push({ name: 'ArticleList' })">
             查看全部
           </el-button>
         </div>

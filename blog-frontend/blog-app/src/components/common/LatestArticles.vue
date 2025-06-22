@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useArticleStore } from '../../store/article';
 import { formatDate } from '../../utils';
+import { Clock, Document, ArrowRight } from '@element-plus/icons-vue';
 
 const props = defineProps({
   title: {
@@ -66,18 +67,34 @@ onMounted(() => {
 
 <template>
   <div class="latest-articles-container">
-    <h3 class="latest-articles-title">{{ title }}</h3>
-    <el-divider />
+    <h3 class="latest-articles-title">
+      <el-icon><Clock /></el-icon>
+      {{ title }}
+    </h3>
     <el-skeleton :rows="limit" animated v-if="loading" />
     <div v-else-if="latestArticles.length > 0" class="latest-articles-list">
       <div 
-        v-for="article in latestArticles" 
+        v-for="(article, index) in latestArticles" 
         :key="article.id"
         class="latest-article-item"
         @click="goToDetail(article.id)"
       >
-        <div class="article-title">{{ article.title }}</div>
-        <div class="article-date">{{ formatDate(article.createdAt, 'YYYY-MM-DD') }}</div>
+        <div class="article-index">{{ index + 1 }}</div>
+        <div class="article-content">
+          <div class="article-title">{{ article.title }}</div>
+          <div class="article-meta">
+            <span class="article-date">
+              <el-icon><Document /></el-icon>
+              {{ formatDate(article.createdAt, 'MM-DD') }}
+            </span>
+            <span class="article-views" v-if="article.views">
+              {{ article.views }} 阅读
+            </span>
+          </div>
+        </div>
+        <div class="article-arrow">
+          <el-icon><ArrowRight /></el-icon>
+        </div>
       </div>
     </div>
     <el-empty v-else description="暂无文章" :image-size="60" />
@@ -104,9 +121,12 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #32325d;
-  margin: 0 0 12px 0;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: relative;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
 }
 
 .latest-articles-title::after {
@@ -120,46 +140,106 @@ onMounted(() => {
   border-radius: 3px;
 }
 
+.latest-articles-title .el-icon {
+  color: #5e72e4;
+  font-size: 20px;
+}
+
 .latest-articles-list {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .latest-article-item {
-  padding: 10px 8px;
-  border-bottom: 1px solid rgba(94, 114, 228, 0.1);
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  border-radius: 6px;
-}
-
-.latest-article-item:last-child {
-  border-bottom: none;
+  border: 1px solid #e9ecef;
 }
 
 .latest-article-item:hover {
-  background-color: rgba(94, 114, 228, 0.05);
-  transform: translateX(3px);
-  padding-left: 12px;
+  background: linear-gradient(135deg, rgba(94, 114, 228, 0.1), rgba(130, 94, 228, 0.05));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(94, 114, 228, 0.15);
+  border-color: rgba(94, 114, 228, 0.3);
+}
+
+.article-index {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #5e72e4, #825ee4);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.article-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .article-title {
   font-size: 14px;
   color: #32325d;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
   transition: color 0.3s ease;
+  line-height: 1.4;
 }
 
 .latest-article-item:hover .article-title {
   color: #5e72e4;
 }
 
-.article-date {
-  font-size: 12px;
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
   color: #8898aa;
+}
+
+.article-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.article-date .el-icon {
+  font-size: 12px;
+}
+
+.article-views {
+  font-size: 11px;
+}
+
+.article-arrow {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+  color: #5e72e4;
+}
+
+.latest-article-item:hover .article-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.article-arrow .el-icon {
+  font-size: 14px;
 }
 </style>

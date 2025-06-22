@@ -152,7 +152,7 @@ export const useSearchStore = defineStore('search', () => {
     articles: [],
     total: 0
   });
-  const searchHistory = ref([]);
+  const searchHistory = ref(JSON.parse(localStorage.getItem('searchHistory') || '[]'));
   const hotSearches = ref([]);
   const loading = ref(false);
   const error = ref(null);
@@ -228,6 +228,32 @@ export const useSearchStore = defineStore('search', () => {
     }
   };
   
+  // 添加到搜索历史
+  const addToHistory = (keyword) => {
+    if (!keyword.trim()) return;
+    
+    // 移除已存在的相同关键词
+    const filtered = searchHistory.value.filter(item => item.keyword !== keyword);
+    
+    // 添加新的搜索记录到开头
+    const newItem = {
+      id: Date.now(),
+      keyword: keyword.trim(),
+      timestamp: Date.now()
+    };
+    
+    searchHistory.value = [newItem, ...filtered].slice(0, 10); // 最多保存10条
+    
+    // 保存到localStorage
+    localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value));
+  };
+
+  // 删除单个历史记录
+  const removeFromHistory = (keyword) => {
+    searchHistory.value = searchHistory.value.filter(item => item.keyword !== keyword);
+    localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value));
+  };
+  
   return {
     // 状态
     searchResults,
@@ -240,6 +266,8 @@ export const useSearchStore = defineStore('search', () => {
     search,
     fetchSearchHistory,
     clearHistory,
-    fetchHotSearches
+    fetchHotSearches,
+    addToHistory,
+    removeFromHistory
   };
 });

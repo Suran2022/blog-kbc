@@ -61,7 +61,7 @@ class ArticleControllerTest {
 
     @Test
     void testGetArticles() throws Exception {
-        PageResult<ArticleVO> pageResult = new PageResult<>(0, 10, 1L, Arrays.asList(testArticleVO));
+        PageResult<ArticleVO> pageResult = PageResult.of(0, 10, 1L, Arrays.asList(testArticleVO));
         when(articleService.getArticles(anyInt(), anyInt(), any(), any(), any())).thenReturn(pageResult);
 
         mockMvc.perform(get("/api/articles")

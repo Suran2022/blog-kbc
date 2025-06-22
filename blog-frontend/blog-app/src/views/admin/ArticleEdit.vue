@@ -20,7 +20,7 @@ const loading = ref(false);
 const fetchArticle = async () => {
   if (!articleId) {
     ElMessage.error('文章ID不存在');
-    router.push({ name: 'ArticleManagement' });
+    router.push({ name: 'ArticleList' });
     return;
   }
   
@@ -29,12 +29,12 @@ const fetchArticle = async () => {
     article.value = await articleStore.fetchArticleById(articleId);
     if (!article.value) {
       ElMessage.error('文章不存在');
-      router.push({ name: 'ArticleManagement' });
+      router.push({ name: 'ArticleList' });
     }
   } catch (error) {
     console.error('获取文章详情失败:', error);
     ElMessage.error('获取文章详情失败');
-    router.push({ name: 'ArticleManagement' });
+    router.push({ name: 'ArticleList' });
   } finally {
     loading.value = false;
   }
@@ -43,12 +43,12 @@ const fetchArticle = async () => {
 // 处理保存成功
 const handleSaveSuccess = () => {
   ElMessage.success('文章更新成功');
-  router.push({ name: 'ArticleManagement' });
+  router.push({ name: 'ArticleList' });
 };
 
 // 处理取消
 const handleCancel = () => {
-  router.push({ name: 'ArticleManagement' });
+  router.push({ name: 'ArticleList' });
 };
 
 onMounted(() => {

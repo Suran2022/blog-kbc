@@ -132,4 +132,57 @@ public class ArticleController {
         List<ArticleVO> articleVOList = articleService.getPopularArticles(limit);
         return Result.success(articleVOList);
     }
+
+    /**
+     * 搜索文章
+     *
+     * @param keyword  搜索关键词
+     * @param tag      标签
+     * @param page     页码
+     * @param size     每页数量
+     * @param sortBy   排序字段：createTime, viewCount, title
+     * @param sortDir  排序方向：asc, desc
+     * @return 搜索结果
+     */
+    @Operation(summary = "搜索文章", description = "根据关键词和标签搜索文章，支持高亮显示")
+    @GetMapping("/search")
+    public Result<PageResult<ArticleVO>> searchArticles(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String tag,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "createTime") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        PageResult<ArticleVO> pageResult = articleService.searchArticles(keyword, tag, page, size, sortBy, sortDir);
+        return Result.success(pageResult);
+    }
+
+    /**
+     * 获取搜索建议
+     *
+     * @param keyword 关键词前缀
+     * @param limit   建议数量
+     * @return 搜索建议列表
+     */
+    @Operation(summary = "获取搜索建议", description = "根据关键词前缀获取搜索建议")
+    @GetMapping("/search/suggestions")
+    public Result<List<String>> getSearchSuggestions(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "5") Integer limit) {
+        List<String> suggestions = articleService.getSearchSuggestions(keyword, limit);
+        return Result.success(suggestions);
+    }
+
+    /**
+     * 获取热门搜索关键词
+     *
+     * @param limit 数量限制
+     * @return 热门搜索关键词列表
+     */
+    @Operation(summary = "获取热门搜索关键词", description = "获取最热门的搜索关键词")
+    @GetMapping("/search/hot")
+    public Result<List<String>> getHotSearchKeywords(@RequestParam(defaultValue = "10") Integer limit) {
+        List<String> hotKeywords = articleService.getHotSearchKeywords(limit);
+        return Result.success(hotKeywords);
+    }
 }
