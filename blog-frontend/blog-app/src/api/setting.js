@@ -18,7 +18,7 @@ export function getSettings() {
  */
 export function updateSettings(data) {
   return request({
-    url: '/admin/settings',
+    url: '/settings',
     method: 'put',
     data
   });

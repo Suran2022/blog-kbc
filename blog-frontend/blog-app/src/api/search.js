@@ -12,7 +12,7 @@ import request from '@/utils/request'
  */
 export function searchArticles(params) {
   return request({
-    url: '/api/articles/search',
+    url: '/articles/search',
     method: 'get',
     params
   })
@@ -24,7 +24,7 @@ export function searchArticles(params) {
  */
 export function getSearchSuggestions(keyword) {
   return request({
-    url: '/api/articles/search/suggestions',
+    url: '/articles/search/suggestions',
     method: 'get',
     params: { keyword }
   })
@@ -35,7 +35,7 @@ export function getSearchSuggestions(keyword) {
  */
 export function getHotSearchKeywords() {
   return request({
-    url: '/api/articles/search/hot-keywords',
+    url: '/articles/search/hot-keywords',
     method: 'get'
   })
 }

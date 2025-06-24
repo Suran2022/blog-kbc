@@ -1,0 +1,288 @@
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql-dev:
+    image: mysql:8.0
+    container_name: blog-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-blog}
+      MYSQL_USER: ${MYSQL_USER:-blog_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-blog_password}
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_dev:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./logs/mysql:/var/log/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+      --max_allowed_packet=128M
+      --sql-mode="STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO"
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root123456}"]
+      timeout: 20s
+      retries: 10
+      interval: 30s
+      start_period: 40s
+
+  # Redis缓存
+  redis-dev:
+    image: redis:7-alpine
+    container_name: blog-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_dev:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./logs/redis:/var/log/redis
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+      retries: 5
+      interval: 10s
+      start_period: 10s
+
+  # 后端应用（开发模式）
+  backend-dev:
+    build:
+      context: ../blog-backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: blog-backend-dev
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-dev:3306/${MYSQL_DATABASE:-blog}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-blog_user}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-blog_password}
+      SPRING_REDIS_HOST: redis-dev
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-here-please-change-in-production}
+      FILE_UPLOAD_PATH: /app/uploads
+      JAVA_OPTS: >
+        -Xms512m
+        -Xmx1024m
+        -XX:+UseG1GC
+        -XX:+UseStringDeduplication
+        -Dspring.profiles.active=dev
+        -Dfile.encoding=UTF-8
+        -Duser.timezone=Asia/Shanghai
+        -Djava.security.egd=file:/dev/./urandom
+        -Dspring.devtools.restart.enabled=true
+        -Dspring.devtools.livereload.enabled=true
+    ports:
+      - "8080:8080"
+      - "35729:35729"  # LiveReload端口
+    volumes:
+      - ../blog-backend/src:/app/src:ro
+      - ../blog-backend/target:/app/target
+      - uploads_dev:/app/uploads
+      - ./logs/backend:/app/logs
+      - ~/.m2:/root/.m2:ro  # Maven本地仓库
+    depends_on:
+      mysql-dev:
+        condition: service_healthy
+      redis-dev:
+        condition: service_healthy
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+      start_period: 60s
+
+  # 前端应用（开发模式）
+  frontend-dev:
+    build:
+      context: ../blog-frontend/blog-app
+      dockerfile: Dockerfile
+      target: development
+    container_name: blog-frontend-dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      VITE_API_BASE_URL: http://localhost:8080/api
+      VITE_USE_MOCK: false
+      CHOKIDAR_USEPOLLING: true
+      WATCHPACK_POLLING: true
+    ports:
+      - "3000:3000"
+      - "24678:24678"  # Vite HMR端口
+    volumes:
+      - ../blog-frontend/blog-app/src:/app/src
+      - ../blog-frontend/blog-app/public:/app/public
+      - ../blog-frontend/blog-app/package.json:/app/package.json:ro
+      - ../blog-frontend/blog-app/vite.config.js:/app/vite.config.js:ro
+      - ../blog-frontend/blog-app/tsconfig.json:/app/tsconfig.json:ro
+      - node_modules_dev:/app/node_modules
+      - ./logs/frontend:/app/logs
+    depends_on:
+      - backend-dev
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+      start_period: 30s
+
+  # Nginx（开发代理）
+  nginx-dev:
+    image: nginx:alpine
+    container_name: blog-nginx-dev
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - backend-dev
+      - frontend-dev
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      timeout: 3s
+      retries: 3
+      interval: 10s
+
+  # 邮件服务（开发测试）
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: blog-mailhog-dev
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP端口
+      - "8025:8025"  # Web界面端口
+    networks:
+      - blog-network
+
+  # Adminer（数据库管理）
+  adminer:
+    image: adminer:latest
+    container_name: blog-adminer-dev
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql-dev
+      ADMINER_DESIGN: pepa-linha
+    depends_on:
+      - mysql-dev
+    networks:
+      - blog-network
+
+  # Redis Commander（Redis管理）
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: blog-redis-commander-dev
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      REDIS_HOSTS: local:redis-dev:6379
+      HTTP_USER: admin
+      HTTP_PASSWORD: ${REDIS_COMMANDER_PASSWORD:-admin123}
+    depends_on:
+      - redis-dev
+    networks:
+      - blog-network
+
+  # Elasticsearch（搜索引擎，可选）
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: blog-elasticsearch-dev
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data_dev:/usr/share/elasticsearch/data
+      - ./logs/elasticsearch:/usr/share/elasticsearch/logs
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+      start_period: 60s
+    profiles:
+      - search
+
+  # Kibana（Elasticsearch可视化，可选）
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: blog-kibana-dev
+    restart: unless-stopped
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      XPACK_SECURITY_ENABLED: false
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - blog-network
+    profiles:
+      - search
+
+  # Jaeger（分布式追踪，可选）
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: blog-jaeger-dev
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # HTTP collector
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    networks:
+      - blog-network
+    profiles:
+      - tracing
+
+volumes:
+  mysql_data_dev:
+    driver: local
+  redis_data_dev:
+    driver: local
+  uploads_dev:
+    driver: local
+  node_modules_dev:
+    driver: local
+  elasticsearch_data_dev:
+    driver: local
+
+networks:
+  blog-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

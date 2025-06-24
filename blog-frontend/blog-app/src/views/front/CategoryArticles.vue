@@ -113,103 +113,200 @@ onMounted(() => {
         type="error"
         :closable="false"
         show-icon
+        class="error-alert"
       />
       
       <template v-else>
         <div class="category-header" v-if="category">
-          <h2 class="category-title">
-            <el-tag :type="category.type || 'info'" effect="dark" class="category-tag">
-              {{ category.name }}
-            </el-tag>
-            分类下的文章
-          </h2>
-          <div class="category-description" v-if="category.description">
-            {{ category.description }}
+          <div class="category-info">
+            <h1 class="category-title">
+              <el-tag :type="category.type || 'primary'" effect="dark" class="category-tag">
+                {{ category.name }}
+              </el-tag>
+              <span class="title-text">分类文章</span>
+            </h1>
+            <div class="category-meta">
+              <span class="article-count">共 {{ total }} 篇文章</span>
+              <div class="category-description" v-if="category.description">
+                {{ category.description }}
+              </div>
+            </div>
           </div>
         </div>
         
         <div class="article-list">
-          <el-skeleton :rows="5" animated v-if="loading" />
+          <el-skeleton :rows="8" animated v-if="loading" />
           
           <template v-else>
-            <div v-if="articles.length > 0">
+            <div v-if="articles.length > 0" class="articles-grid">
               <ArticleCard 
                 v-for="article in articles" 
                 :key="article.id"
                 :article="article"
+                class="article-item"
               />
               
-              <Pagination
-                v-model:current-page="currentPage"
-                v-model:page-size="pageSize"
-                :total="total"
-                @pagination="handlePagination"
-              />
+              <div class="pagination-container">
+                <Pagination
+                  :current-page="currentPage"
+                  :page-size="pageSize"
+                  :total="total"
+                  @pagination="handlePagination"
+                />
+              </div>
             </div>
-            <el-empty v-else description="该分类下暂无文章" />
+            <el-empty v-else description="该分类下暂无文章" class="empty-state" />
           </template>
         </div>
       </template>
     </div>
     
     <div class="sidebar">
-      <CategoryList />
-      <LatestArticles />
-      <PopularArticles />
-      <ContributorList />
+      <div class="sidebar-section">
+        <CategoryList />
+      </div>
+      <div class="sidebar-section">
+        <LatestArticles />
+      </div>
+      <div class="sidebar-section">
+        <PopularArticles />
+      </div>
+      <div class="sidebar-section">
+        <ContributorList />
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .category-articles-container {
-  display: flex;
-  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 2rem;
+  min-height: 100vh;
 }
 
 .main-content {
-  flex: 1;
-  min-width: 0; /* 防止flex子项溢出 */
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.sidebar {
-  width: 300px;
-  flex-shrink: 0;
+.error-alert {
+  margin-bottom: 2rem;
 }
 
 .category-header {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.category-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .category-title {
-  font-size: 18px;
-  color: #303133;
-  margin: 0 0 10px 0;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
   display: flex;
   align-items: center;
+  gap: 1rem;
 }
 
 .category-tag {
-  margin-right: 10px;
+  font-size: 0.9rem;
+}
+
+.title-text {
+  color: #666;
+}
+
+.category-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.article-count {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .category-description {
-  color: #606266;
-  font-size: 14px;
+  color: #666;
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 
+.articles-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.article-item {
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1.5rem;
+}
+
+.article-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pagination-container {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.empty-state {
+  margin: 3rem 0;
+}
+
+.sidebar {
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+}
+
+.sidebar-section {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
   .category-articles-container {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    padding: 1rem;
   }
   
-  .sidebar {
-    width: 100%;
+  .main-content {
+    padding: 1.5rem;
+  }
+  
+  .category-title {
+    font-size: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .sidebar-section {
+    padding: 1rem;
   }
 }
 </style>

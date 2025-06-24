@@ -9,8 +9,12 @@ import com.blog.repository.ArticleRepository;
 import com.blog.repository.CategoryRepository;
 import com.blog.security.JwtUserDetails;
 import com.blog.service.ArticleService;
+import com.blog.util.PerformanceMonitor;
 import com.blog.vo.ArticleVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +42,8 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"articles", "popularArticles"}, allEntries = true)
+    @PerformanceMonitor.Monitor(value = "创建文章", slowThreshold = 2000)
     public ArticleVO createArticle(ArticleDTO articleDTO) {
         // 验证分类是否存在
         Category category = categoryRepository.findById(articleDTO.getCategoryId())
@@ -63,6 +69,11 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "articles", key = "#id"),
+        @CacheEvict(value = "popularArticles", allEntries = true)
+    })
+    @PerformanceMonitor.Monitor(value = "更新文章", slowThreshold = 2000)
     public ArticleVO updateArticle(Long id, ArticleDTO articleDTO) {
         // 查询文章
         Article article = articleRepository.findById(id)
@@ -104,6 +115,11 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "articles", key = "#id"),
+        @CacheEvict(value = "popularArticles", allEntries = true)
+    })
+    @PerformanceMonitor.Monitor(value = "删除文章")
     public void deleteArticle(Long id) {
         // 查询文章
         Article article = articleRepository.findById(id)
@@ -114,7 +130,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Transactional
+    @Cacheable(value = "articles", key = "#id")
+    @PerformanceMonitor.Monitor(value = "获取文章详情")
     public ArticleVO getArticle(Long id) {
         // 查询文章
         Article article = articleRepository.findById(id)
@@ -192,6 +209,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Cacheable(value = "popularArticles", key = "#limit")
+    @PerformanceMonitor.Monitor(value = "获取热门文章", slowThreshold = 1000)
     public List<ArticleVO> getPopularArticles(Integer limit) {
         // 查询热门文章
         List<Article> articleList = articleRepository.findPopularArticles(limit);
@@ -237,6 +256,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
     
     @Override
+    @Cacheable(value = "searchSuggestions", key = "#keyword + '_' + #limit")
+    @PerformanceMonitor.Monitor(value = "获取搜索建议")
     public List<String> getSearchSuggestions(String keyword, Integer limit) {
         if (!StringUtils.hasText(keyword)) {
             return List.of();

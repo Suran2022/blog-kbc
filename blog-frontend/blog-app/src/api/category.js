@@ -6,7 +6,7 @@ import request from '@/utils/request';
  */
 export function getCategories() {
   return request({
-    url: '/api/categories',
+    url: '/categories',
     method: 'get'
   });
 }
@@ -18,7 +18,7 @@ export function getCategories() {
  */
 export function getCategoryById(id) {
   return request({
-    url: `/api/categories/${id}`,
+    url: `/categories/${id}`,
     method: 'get'
   });
 }
@@ -32,7 +32,7 @@ export function getCategoryById(id) {
  */
 export function createCategory(data) {
   return request({
-    url: '/api/categories',
+    url: '/categories',
     method: 'post',
     data
   });
@@ -48,7 +48,7 @@ export function createCategory(data) {
  */
 export function updateCategory(id, data) {
   return request({
-    url: `/api/categories/${id}`,
+    url: `/categories/${id}`,
     method: 'put',
     data
   });
@@ -61,7 +61,7 @@ export function updateCategory(id, data) {
  */
 export function deleteCategory(id) {
   return request({
-    url: `/api/categories/${id}`,
+    url: `/categories/${id}`,
     method: 'delete'
   });
 }

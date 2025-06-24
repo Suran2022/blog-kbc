@@ -22,9 +22,19 @@
         <div class="results-layout">
           <!-- 左侧：搜索结果列表 -->
           <div class="results-main">
+            <!-- 结果统计 -->
+            <div class="results-header" v-if="!loading">
+              <h2 class="results-title">搜索结果</h2>
+              <div class="results-stats">
+                <span class="keyword-highlight">"{{ keyword }}"</span>
+                <span class="results-count">找到 {{ total }} 个结果</span>
+                <span class="search-time">用时 {{ searchTime }}ms</span>
+              </div>
+            </div>
+
             <!-- 加载状态 -->
             <div v-if="loading" class="loading-container">
-              <el-skeleton :rows="5" animated />
+              <el-skeleton :rows="8" animated />
             </div>
 
             <!-- 搜索结果列表 -->
@@ -45,7 +55,7 @@
                     </span>
                     <span class="meta-item">
                       <el-icon><View /></el-icon>
-                      {{ article.viewCount }} 次阅读
+                      {{ article.viewCount }}
                     </span>
                     <span class="meta-item" v-if="article.categoryName">
                       <el-icon><Folder /></el-icon>
@@ -85,9 +95,9 @@
               <el-pagination
                 v-model:current-page="currentPage"
                 v-model:page-size="pageSize"
-                :page-sizes="[10, 20, 50]"
+                :page-sizes="[10, 20, 30]"
                 :total="total"
-                layout="total, sizes, prev, pager, next, jumper"
+                layout="total, sizes, prev, pager, next"
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
               />
@@ -96,7 +106,9 @@
 
           <!-- 右侧：搜索建议 -->
           <div class="results-sidebar">
-            <SearchSuggestions />
+            <div class="sidebar-section">
+              <SearchSuggestions />
+            </div>
           </div>
         </div>
       </div>
@@ -243,27 +255,28 @@ onMounted(() => {
 .search-header {
   background: white;
   border-bottom: 1px solid #e9ecef;
-  padding: 20px 0;
+  padding: 1.5rem 0;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 1rem;
 }
 
 .search-box-results {
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .search-info {
   display: flex;
   align-items: center;
-  gap: 15px;
-  font-size: 14px;
+  gap: 1rem;
+  font-size: 0.9rem;
   color: #6c757d;
 }
 
@@ -273,35 +286,73 @@ onMounted(() => {
 }
 
 .search-content {
-  padding: 30px 0;
+  padding: 2rem 0;
 }
 
 .results-layout {
   display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 30px;
+  grid-template-columns: 1fr 280px;
+  gap: 2rem;
 }
 
 .results-main {
   background: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.results-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.results-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 1rem 0;
+}
+
+.results-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.keyword-highlight {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.results-count {
+  font-weight: 500;
+}
+
+.search-time {
+  color: #999;
 }
 
 .loading-container {
-  padding: 20px 0;
+  padding: 1.5rem 0;
 }
 
 .results-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  gap: 1.5rem;
 }
 
 .result-item {
   display: flex;
-  padding: 20px;
+  padding: 1.5rem;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   cursor: pointer;
@@ -317,22 +368,22 @@ onMounted(() => {
 
 .result-content {
   flex: 1;
-  margin-right: 20px;
+  margin-right: 1.5rem;
 }
 
 .result-title {
-  font-size: 18px;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #2c3e50;
-  margin: 0 0 10px 0;
+  margin: 0 0 0.75rem 0;
   line-height: 1.4;
 }
 
 .result-summary {
-  font-size: 14px;
+  font-size: 0.9rem;
   color: #6c757d;
   line-height: 1.6;
-  margin: 0 0 15px 0;
+  margin: 0 0 1rem 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -342,35 +393,35 @@ onMounted(() => {
 .result-meta {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 0.25rem;
+  font-size: 0.8rem;
   color: #6c757d;
 }
 
 .meta-item .el-icon {
-  font-size: 14px;
+  font-size: 0.9rem;
 }
 
 .tags {
   display: flex;
-  gap: 6px;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
 .tag-item {
-  font-size: 11px;
+  font-size: 0.75rem;
 }
 
 .result-thumbnail {
-  width: 120px;
-  height: 80px;
+  width: 100px;
+  height: 70px;
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
@@ -384,40 +435,50 @@ onMounted(() => {
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 3rem 1rem;
 }
 
 .empty-icon {
-  font-size: 64px;
+  font-size: 4rem;
   color: #c0c4cc;
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
 }
 
 .empty-title {
-  font-size: 20px;
+  font-size: 1.25rem;
   color: #303133;
-  margin: 0 0 10px 0;
+  margin: 0 0 0.75rem 0;
 }
 
 .empty-description {
-  font-size: 14px;
+  font-size: 0.9rem;
   color: #6c757d;
-  margin: 0 0 30px 0;
+  margin: 0 0 2rem 0;
   line-height: 1.6;
 }
 
 .pagination-container {
   display: flex;
   justify-content: center;
-  margin-top: 30px;
-  padding-top: 20px;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
   border-top: 1px solid #e9ecef;
 }
 
 .results-sidebar {
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
   position: sticky;
   top: 120px;
   height: fit-content;
+}
+
+.sidebar-section {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 :deep(.highlight) {
@@ -432,7 +493,7 @@ onMounted(() => {
 @media (max-width: 1024px) {
   .results-layout {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 1.5rem;
   }
   
   .results-sidebar {
@@ -442,40 +503,50 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 15px;
+    padding: 0 1rem;
   }
   
   .search-content {
-    padding: 20px 0;
+    padding: 1.5rem 0;
   }
   
   .results-main {
-    padding: 20px 15px;
+    padding: 1.5rem;
   }
   
   .result-item {
     flex-direction: column;
-    padding: 15px;
+    padding: 1rem;
   }
   
   .result-content {
     margin-right: 0;
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
   }
   
   .result-thumbnail {
     width: 100%;
-    height: 150px;
+    height: 120px;
   }
   
   .result-meta {
-    gap: 10px;
+    gap: 0.75rem;
   }
   
   .search-info {
     flex-direction: column;
     align-items: flex-start;
-    gap: 5px;
+    gap: 0.5rem;
+  }
+  
+  .results-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .sidebar-section {
+    padding: 1rem;
   }
 }
 </style>

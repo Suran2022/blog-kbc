@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useSettingStore } from '../../store/setting';
 import SettingEditor from '../../components/admin/SettingEditor.vue';
+import { ElMessage } from 'element-plus';
 
 const settingStore = useSettingStore();
 

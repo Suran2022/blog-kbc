@@ -87,17 +87,50 @@ onMounted(() => {
 
 <style scoped>
 .article-detail-container {
-  display: flex;
-  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 2rem;
+  min-height: 100vh;
 }
 
 .main-content {
-  flex: 1;
-  min-width: 0; /* 防止flex子项溢出 */
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .sidebar {
-  width: 300px;
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+}
+
+.sidebar > * {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .article-detail-container {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  
+  .main-content {
+    padding: 1.5rem;
+  }
+  
+  .sidebar > * {
+    padding: 1rem;
+  }
   flex-shrink: 0;
 }
 

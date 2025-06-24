@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -95,17 +96,18 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
      * @return 影响行数
      */
     @Modifying
+    @Transactional
     @Query("UPDATE Article a SET a.viewCount = a.viewCount + 1 WHERE a.id = ?1")
     int incrementViewCount(Long id);
 
     /**
-     * 获取最新文章列表
+     * 根据状态查询文章并按创建时间倒序排列
      *
-     * @param status 状态
-     * @param limit  数量限制
+     * @param status   状态
+     * @param pageable 分页参数
      * @return 文章列表
      */
-    List<Article> findByStatusOrderByCreateTimeDesc(Integer status, Pageable pageable);
+    Page<Article> findByStatusOrderByCreateTimeDesc(Integer status, Pageable pageable);
 
     /**
      * 获取热门文章列表
@@ -187,4 +189,42 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
      */
     List<Article> findByTitleContainingIgnoreCaseAndStatusOrderByViewCountDesc(
             String title, Integer status, Pageable pageable);
+
+    /**
+     * 根据关键词查询标题建议
+     *
+     * @param keyword 关键词
+     * @param limit   限制数量
+     * @return 标题建议列表
+     */
+    @Query(value = "SELECT DISTINCT a.title FROM Article a WHERE a.title LIKE CONCAT('%', :keyword, '%') AND a.status = 1 ORDER BY a.viewCount DESC LIMIT :limit", nativeQuery = true)
+    List<String> findTitleSuggestions(@Param("keyword") String keyword, @Param("limit") int limit);
+
+    /**
+     * 查询热门搜索关键词
+     *
+     * @param limit 限制数量
+     * @return 热门关键词列表
+     */
+    @Query("SELECT a.tags FROM Article a WHERE a.status = 1 AND a.tags IS NOT NULL GROUP BY a.tags ORDER BY COUNT(a.tags) DESC")
+    List<String> findHotSearchKeywords(@Param("limit") int limit);
+
+    /**
+     * 根据标题模糊查询并按创建时间倒序排列
+     *
+     * @param title    标题关键词
+     * @param status   状态
+     * @param pageable 分页参数
+     * @return 文章列表
+     */
+    Page<Article> findByTitleContainingIgnoreCaseAndStatusOrderByCreateTimeDesc(
+            String title, Integer status, Pageable pageable);
+
+    /**
+     * 查询前10篇热门文章
+     *
+     * @param status 状态
+     * @return 文章列表
+     */
+    List<Article> findTop10ByStatusOrderByViewCountDesc(Integer status);
 }

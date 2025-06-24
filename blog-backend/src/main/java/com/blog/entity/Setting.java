@@ -14,7 +14,7 @@ import java.util.Date;
  */
 @Data
 @Entity
-@Table(name = "setting")
+@Table(name = "settings")
 @EntityListeners(AuditingEntityListener.class)
 public class Setting implements Serializable {
 

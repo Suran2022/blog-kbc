@@ -12,7 +12,7 @@ import request from '@/utils/request';
  */
 export function getArticles(params) {
   return request({
-    url: '/api/articles',
+    url: '/articles',
     method: 'get',
     params
   });
@@ -25,7 +25,7 @@ export function getArticles(params) {
  */
 export function getArticle(id) {
   return request({
-    url: `/api/articles/${id}`,
+    url: `/articles/${id}`,
     method: 'get'
   });
 }
@@ -40,7 +40,7 @@ export const getArticleById = getArticle;
  */
 export function createArticle(data) {
   return request({
-    url: '/api/articles',
+    url: '/articles',
     method: 'post',
     data
   });
@@ -54,7 +54,7 @@ export function createArticle(data) {
  */
 export function updateArticle(id, data) {
   return request({
-    url: `/api/articles/${id}`,
+    url: `/articles/${id}`,
     method: 'put',
     data
   });
@@ -67,7 +67,7 @@ export function updateArticle(id, data) {
  */
 export function deleteArticle(id) {
   return request({
-    url: `/api/articles/${id}`,
+    url: `/articles/${id}`,
     method: 'delete'
   });
 }
@@ -124,7 +124,7 @@ export function getLatestArticles(limit = 5) {
  */
 export function getPopularArticles(limit = 5) {
   return request({
-    url: '/api/articles/popular',
+    url: '/articles/popular',
     method: 'get',
     params: { limit }
   });

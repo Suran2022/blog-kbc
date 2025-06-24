@@ -46,14 +46,8 @@ const goToDetail = (articleId) => {
   });
 };
 
-// 监听文章列表变化，自动刷新最新文章
-watch(
-  () => articleStore.articles,
-  () => {
-    fetchLatestArticles();
-  },
-  { deep: true }
-);
+// 移除可能导致无限循环的watch监听器
+// 如果需要响应文章变化，可以通过父组件手动调用refresh方法
 
 // 暴露刷新方法给父组件
 defineExpose({
