@@ -14,7 +14,7 @@ import java.util.Date;
  */
 @Data
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
 public class User implements Serializable {
 

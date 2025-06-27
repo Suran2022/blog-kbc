@@ -86,7 +86,7 @@ export const useTagStore = defineStore('tag', () => {
     loading.value = true;
     try {
       const response = await getTags();
-      tags.value = response.data;
+      tags.value = response.data || [];
       loading.value = false;
       return Promise.resolve(response);
     } catch (error) {
@@ -100,7 +100,7 @@ export const useTagStore = defineStore('tag', () => {
     loading.value = true;
     try {
       const response = await getPopularTags(limit);
-      tags.value = response.data;
+      tags.value = response.data || [];
       loading.value = false;
       return Promise.resolve(response);
     } catch (error) {

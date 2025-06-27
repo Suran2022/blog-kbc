@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -117,10 +118,25 @@ public class CategoryServiceImpl implements CategoryService {
         // 查询所有可用分类
         List<Category> categoryList = categoryRepository.findByStatus(1, Sort.by(Sort.Direction.ASC, "sort"));
 
+        // 批量获取所有分类的文章数量，避免N+1查询
+        List<Long> categoryIds = categoryList.stream()
+                .map(Category::getId)
+                .collect(Collectors.toList());
+        
+        // 使用一次查询获取所有分类的文章数量
+        List<Object[]> articleCounts = articleRepository.countArticlesByCategoryIds(categoryIds);
+        
+        // 将结果转换为Map，便于查找
+        Map<Long, Long> articleCountMap = articleCounts.stream()
+                .collect(Collectors.toMap(
+                    result -> (Long) result[0], // categoryId
+                    result -> (Long) result[1]  // count
+                ));
+
         // 转换为VO
         return categoryList.stream()
                 .map(category -> {
-                    Long articleCount = articleRepository.countByCategoryId(category.getId());
+                    Long articleCount = articleCountMap.getOrDefault(category.getId(), 0L);
                     return convertToVO(category, articleCount);
                 })
                 .collect(Collectors.toList());

@@ -18,9 +18,8 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 ENV_FILE="$SCRIPT_DIR/.env"
-DEV_ENV_FILE="$SCRIPT_DIR/.env.dev"
 COMMAND="${1:-help}"
-ENVIRONMENT="${2:-dev}"
+ENVIRONMENT="${2:-prod}"
 SERVICES="${3:-all}"
 
 # 日志函数
@@ -154,11 +153,7 @@ init_environment() {
 
 # 获取Docker Compose文件
 get_compose_file() {
-    if [[ "$ENVIRONMENT" == "prod" ]]; then
-        echo "$SCRIPT_DIR/docker-compose.prod.yml"
-    else
-        echo "$SCRIPT_DIR/docker-compose.dev.yml"
-    fi
+    echo "$SCRIPT_DIR/docker-compose.prod.yml"
 }
 
 # 获取服务列表

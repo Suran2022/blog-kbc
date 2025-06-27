@@ -1,17 +1,34 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '../store/user';
+import { useSettingStore } from '../store/setting';
 import Breadcrumb from '../components/admin/Breadcrumb.vue';
 
 const router = useRouter();
 const userStore = useUserStore();
+const settingStore = useSettingStore();
 
 // 侧边栏折叠状态
 const isCollapse = ref(false);
 
 // 用户信息
 const username = computed(() => userStore.username);
+
+// 站点信息
+const siteInfo = computed(() => ({
+  siteName: settingStore.siteName,
+  siteLogo: settingStore.siteLogo
+}));
+
+// 组件挂载时获取设置
+onMounted(async () => {
+  try {
+    await settingStore.fetchSettings();
+  } catch (error) {
+    console.warn('无法获取网站设置，使用默认值');
+  }
+});
 
 // 菜单项
 const menuItems = [
@@ -32,6 +49,12 @@ const menuItems = [
     title: '分类管理',
     index: '/admin/categories',
     route: { name: 'CategoryManagement' }
+  },
+  {
+    icon: 'ChatDotRound',
+    title: '评论管理',
+    index: '/admin/comments',
+    route: { name: 'CommentManagement' }
   },
   {
     icon: 'Setting',
@@ -71,8 +94,14 @@ const handleLogout = async () => {
     <el-aside :width="isCollapse ? '64px' : '220px'" class="sidebar">
       <!-- Logo -->
       <div class="logo-container">
-        <h1 class="logo" v-if="!isCollapse">博客后台</h1>
-        <h1 class="logo-small" v-else>博</h1>
+        <div v-if="!isCollapse" class="logo">
+          <img v-if="siteInfo.siteLogo" :src="siteInfo.siteLogo" :alt="siteInfo.siteName" class="logo-img" />
+          <h1 v-else class="logo-text">{{ siteInfo.siteName }}后台</h1>
+        </div>
+        <div v-else class="logo-small">
+          <img v-if="siteInfo.siteLogo" :src="siteInfo.siteLogo" :alt="siteInfo.siteName" class="logo-img-small" />
+          <h1 v-else class="logo-text-small">{{ siteInfo.siteName.charAt(0) }}</h1>
+        </div>
       </div>
       
       <!-- 菜单 -->
@@ -155,6 +184,12 @@ const handleLogout = async () => {
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
   color: #fff;
   font-size: 18px;
   font-weight: bold;
@@ -162,11 +197,30 @@ const handleLogout = async () => {
   white-space: nowrap;
 }
 
+.logo-img {
+  height: 32px;
+  width: auto;
+  max-width: 180px;
+  object-fit: contain;
+}
+
 .logo-small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text-small {
   color: #fff;
   font-size: 20px;
   font-weight: bold;
   margin: 0;
+}
+
+.logo-img-small {
+  height: 24px;
+  width: 24px;
+  object-fit: contain;
 }
 
 .sidebar-menu {

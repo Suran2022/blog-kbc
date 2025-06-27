@@ -113,7 +113,7 @@ export const useCategoryStore = defineStore('category', () => {
     loading.value = true;
       try {
         const response = await getCategories();
-        categories.value = response.data;
+        categories.value = response.data || [];
         loading.value = false;
         return Promise.resolve(response);
       } catch (error) {

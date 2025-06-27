@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useSettingStore } from '../store/setting';
 
 // 前台路由
 const frontRoutes = [
@@ -63,7 +64,7 @@ const adminRoutes = [
       {
         path: 'articles/create',
         name: 'ArticleCreate',
-        component: () => import('../views/admin/ArticleEdit.vue'),
+        component: () => import('../views/admin/ArticleCreate.vue'),
         meta: { title: '创建文章', requiresAuth: true }
       },
       {
@@ -77,6 +78,12 @@ const adminRoutes = [
         name: 'CategoryManagement',
         component: () => import('../views/admin/CategoryManagement.vue'),
         meta: { title: '分类管理', requiresAuth: true }
+      },
+      {
+        path: 'comments',
+        name: 'CommentManagement',
+        component: () => import('../views/admin/CommentManagement.vue'),
+        meta: { title: '评论管理', requiresAuth: true }
       },
       {
         path: 'settings',
@@ -96,9 +103,22 @@ const router = createRouter({
 });
 
 // 全局前置守卫
-router.beforeEach((to, from, next) => {
-  // 设置页面标题
-  document.title = to.meta.title ? `${to.meta.title} - 博客系统` : '博客系统';
+router.beforeEach(async (to, from, next) => {
+  // 获取设置store
+  const settingStore = useSettingStore();
+  
+  // 确保设置已加载
+  if (!settingStore.settings || Object.keys(settingStore.settings).length === 0) {
+    try {
+      await settingStore.fetchSettings();
+    } catch (error) {
+      console.warn('无法获取网站设置，使用默认值');
+    }
+  }
+  
+  // 设置页面标题，使用设置中的网站名称
+  const siteName = settingStore.siteName || '博客系统';
+  document.title = to.meta.title ? `${to.meta.title} - ${siteName}` : siteName;
   
   // 权限验证
   if (to.meta.requiresAuth) {

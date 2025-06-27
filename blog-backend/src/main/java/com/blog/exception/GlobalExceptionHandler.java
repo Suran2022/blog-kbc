@@ -127,6 +127,40 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 处理数据库相关异常
+     */
+    @ExceptionHandler({java.sql.SQLException.class, org.springframework.dao.DataAccessException.class, javax.persistence.PersistenceException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Result<Void> handleDatabaseException(Exception e) {
+        log.error("数据库操作异常：{}", e.getMessage(), e);
+        
+        if (e instanceof java.sql.SQLException) {
+            java.sql.SQLException sqlEx = (java.sql.SQLException) e;
+            log.error("SQL状态: {}", sqlEx.getSQLState());
+            log.error("错误代码: {}", sqlEx.getErrorCode());
+            
+            // 检查是否是访问权限问题
+            if (sqlEx.getMessage().contains("Access denied") || sqlEx.getMessage().contains("拒绝访问")) {
+                return Result.failed(ResultCode.FAILED, "数据库访问权限错误，请检查用户名和密码配置");
+            }
+            
+            // 检查是否是连接问题
+            if (sqlEx.getMessage().contains("Communications link failure") || 
+                sqlEx.getMessage().contains("Connection refused")) {
+                return Result.failed(ResultCode.FAILED, "无法连接到数据库服务器，请确保MySQL服务已启动");
+            }
+            
+            // 检查是否是数据库不存在问题
+            if (sqlEx.getMessage().contains("Unknown database") || 
+                sqlEx.getMessage().contains("未知数据库")) {
+                return Result.failed(ResultCode.FAILED, "数据库不存在，请先创建数据库");
+            }
+        }
+        
+        return Result.failed("数据库操作异常，请联系管理员");
+    }
+    
+    /**
      * 处理其他异常
      */
     @ExceptionHandler(Exception.class)

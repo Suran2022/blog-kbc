@@ -105,12 +105,20 @@ const fetchArticleDetail = async () => {
     const article = articleStore.currentArticle;
     
     if (article) {
+      // 处理tags：如果是字符串则转换为数组，如果是数组则直接使用
+      let tags = article.tags || [];
+      if (typeof tags === 'string' && tags.trim()) {
+        tags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      } else if (!Array.isArray(tags)) {
+        tags = [];
+      }
+      
       articleForm.value = {
         title: article.title || '',
         content: article.content || '',
         summary: article.summary || '',
         categoryId: article.category ? article.category.id : '',
-        tags: article.tags || [],
+        tags: tags,
         status: article.status !== undefined ? article.status : 1,
         coverImage: article.coverImage || ''
       };
@@ -228,6 +236,11 @@ const saveArticle = async () => {
       }
       
       const articleData = { ...articleForm.value };
+      
+      // 将tags数组转换为逗号分隔的字符串，以匹配后端期望的格式
+      if (Array.isArray(articleData.tags)) {
+        articleData.tags = articleData.tags.join(',');
+      }
       
       if (isEditMode.value) {
         await articleStore.editArticle(props.articleId, articleData);

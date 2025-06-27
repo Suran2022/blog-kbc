@@ -1,14 +1,9 @@
 <template>
   <div class="search-results">
-    <!-- 搜索头部 -->
-    <div class="search-header">
+    <!-- 搜索信息头部 -->
+    <div class="search-info-header" v-if="!loading">
       <div class="container">
-        <SearchBox 
-          :default-keyword="keyword" 
-          @search="handleSearch"
-          class="search-box-results"
-        />
-        <div class="search-info" v-if="!loading">
+        <div class="search-info">
           <span class="keyword">"{{ keyword }}"</span>
           <span class="count">找到 {{ total }} 个结果</span>
           <span class="time">用时 {{ searchTime }}ms</span>
@@ -121,7 +116,6 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Calendar, View, Folder, Search } from '@element-plus/icons-vue'
-import SearchBox from '../../components/common/SearchBox.vue'
 import SearchSuggestions from '../../components/common/SearchSuggestions.vue'
 import { searchArticles } from '../../api/search'
 import { formatDate } from '../../utils/date'
@@ -160,7 +154,7 @@ const performSearch = async () => {
   try {
     const params = {
       keyword: keyword.value.trim(),
-      page: currentPage.value - 1, // 后端从0开始
+      page: currentPage.value, // 后端会自动处理页码转换
       size: pageSize.value,
       sortBy: sortBy.value,
       sortDir: sortDir.value
@@ -252,14 +246,11 @@ onMounted(() => {
   background: #f8f9fa;
 }
 
-.search-header {
+.search-info-header {
   background: white;
   border-bottom: 1px solid #e9ecef;
-  padding: 1.5rem 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem 0;
+  margin-top: 1rem;
 }
 
 .container {
@@ -268,9 +259,7 @@ onMounted(() => {
   padding: 0 1rem;
 }
 
-.search-box-results {
-  margin-bottom: 1rem;
-}
+
 
 .search-info {
   display: flex;

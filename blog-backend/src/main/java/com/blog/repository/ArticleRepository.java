@@ -127,6 +127,15 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     Long countByCategoryId(Long categoryId);
 
     /**
+     * 批量统计多个分类下的文章数量
+     *
+     * @param categoryIds 分类ID列表
+     * @return 分类ID和对应文章数量的列表
+     */
+    @Query("SELECT a.categoryId, COUNT(a.id) FROM Article a WHERE a.categoryId IN :categoryIds GROUP BY a.categoryId")
+    List<Object[]> countArticlesByCategoryIds(@Param("categoryIds") List<Long> categoryIds);
+
+    /**
      * 获取最新文章列表
      *
      * @param limit 数量限制

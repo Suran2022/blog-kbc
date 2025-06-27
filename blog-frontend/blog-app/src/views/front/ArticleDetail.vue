@@ -69,7 +69,7 @@ onMounted(() => {
         
         <template v-else-if="article">
           <ArticleDetailComponent :article="article" />
-          <CommentSection :article-id="articleId" />
+          <CommentSection :article-id="Number(articleId)" />
         </template>
         
         <el-empty v-else description="文章不存在" />

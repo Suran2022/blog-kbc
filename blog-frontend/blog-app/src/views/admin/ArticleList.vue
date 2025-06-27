@@ -187,7 +187,7 @@ const getArticles = async () => {
 const getCategories = async () => {
   try {
     const response = await categoryApi.getCategories()
-    categories.value = response.data
+    categories.value = response.data || []
   } catch (error) {
     console.error('获取分类列表失败:', error)
   }

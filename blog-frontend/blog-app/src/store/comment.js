@@ -1,163 +1,99 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import request from '@/utils/request';
 
-// 模拟API请求延迟
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// 模拟评论数据
-let mockComments = {
-  // 文章ID为键，评论数组为值
-  '1': [
-    {
-      id: '1',
-      articleId: '1',
-      content: '这篇文章写得非常好，内容丰富，观点独到！',
-      author: '读者A',
-      email: 'reader_a@example.com',
-      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(), // 2天前
-      status: 'approved' // approved, pending, rejected
-    },
-    {
-      id: '2',
-      articleId: '1',
-      content: '学习了很多知识，感谢分享！',
-      author: '读者B',
-      email: 'reader_b@example.com',
-      createdAt: new Date(Date.now() - 86400000).toISOString(), // 1天前
-      status: 'approved'
-    }
-  ],
-  '2': [
-    {
-      id: '3',
-      articleId: '2',
-      content: '这个技术我也在使用，确实很好用！',
-      author: '技术爱好者',
-      email: 'tech_lover@example.com',
-      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(), // 3天前
-      status: 'approved'
-    }
-  ]
-};
-
-// 模拟API
+// API函数
 const getComments = async (articleId, params = {}) => {
-  await delay(600);
+  const { page = 0, limit = 10 } = params;
   
-  const { page = 1, limit = 10 } = params;
+  // 确保articleId是有效值
+  if (!articleId) {
+    console.error('获取评论失败: 文章ID无效');
+    throw new Error('文章ID无效');
+  }
   
-  // 获取指定文章的评论
-  const articleComments = mockComments[articleId] || [];
-  
-  // 只返回已审核通过的评论
-  const approvedComments = articleComments.filter(comment => comment.status === 'approved');
-  
-  // 计算分页
-  const start = (page - 1) * limit;
-  const end = start + limit;
-  const paginatedComments = approvedComments.slice(start, end);
-  
-  return {
-    data: {
-      comments: paginatedComments,
-      total: approvedComments.length
+  console.log(`获取评论，文章ID: ${articleId}, 请求路径: /api/comments/article/${articleId}`);
+  const response = await request.get(`/api/comments/article/${articleId}`, {
+    params: {
+      page,
+      size: limit
     }
-  };
+  });
+  
+  if (response.success) {
+    return {
+      data: {
+        comments: response.data.content,
+        total: response.data.totalElements
+      }
+    };
+  } else {
+    throw new Error(response.message || '获取评论失败');
+  }
 };
 
 const createComment = async (articleId, commentData) => {
-  await delay(800);
-  
-  // 生成ID
-  const newId = String(Date.now());
-  
-  // 创建新评论
-  const newComment = {
-    id: newId,
+  const response = await request.post('/api/comments', {
     articleId,
-    ...commentData,
-    createdAt: new Date().toISOString(),
-    status: 'pending' // 默认为待审核状态
-  };
+    ...commentData
+  });
   
-  // 添加到模拟数据
-  if (!mockComments[articleId]) {
-    mockComments[articleId] = [];
+  if (response.success) {
+    return { data: response.data };
+  } else {
+    throw new Error(response.message || '评论提交失败');
   }
-  
-  mockComments[articleId].push(newComment);
-  
-  return { data: newComment };
 };
 
 const getAdminComments = async (params = {}) => {
-  await delay(600);
+  const { page = 0, limit = 10, status } = params;
   
-  const { page = 1, limit = 10, status } = params;
-  
-  // 获取所有评论并扁平化
-  let allComments = Object.values(mockComments).flat();
-  
-  // 根据状态筛选
-  if (status) {
-    allComments = allComments.filter(comment => comment.status === status);
-  }
-  
-  // 按时间倒序排序
-  allComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  
-  // 计算分页
-  const start = (page - 1) * limit;
-  const end = start + limit;
-  const paginatedComments = allComments.slice(start, end);
-  
-  return {
-    data: {
-      comments: paginatedComments,
-      total: allComments.length
+  const response = await request.get('/api/comments/admin', {
+    params: {
+      page,
+      size: limit,
+      status
     }
-  };
+  });
+  
+  if (response.success) {
+    return {
+      data: {
+        comments: response.data.content,
+        total: response.data.totalElements
+      }
+    };
+  } else {
+    throw new Error(response.message || '获取评论失败');
+  }
 };
 
 const updateCommentStatus = async (commentId, status) => {
-  await delay(500);
+  let response;
   
-  // 查找评论
-  let targetComment = null;
-  let articleId = null;
-  
-  for (const [artId, comments] of Object.entries(mockComments)) {
-    const index = comments.findIndex(c => c.id === commentId);
-    if (index !== -1) {
-      targetComment = comments[index];
-      articleId = artId;
-      break;
-    }
+  if (status === 'approved') {
+    response = await request.put(`/api/comments/${commentId}/approve`);
+  } else if (status === 'rejected') {
+    response = await request.put(`/api/comments/${commentId}/reject`);
+  } else {
+    throw new Error('无效的状态');
   }
   
-  if (!targetComment) {
-    throw new Error('评论不存在');
+  if (response.success) {
+    return { data: response.data };
+  } else {
+    throw new Error(response.message || '更新评论状态失败');
   }
-  
-  // 更新状态
-  targetComment.status = status;
-  
-  return { data: targetComment };
 };
 
 const deleteComment = async (commentId) => {
-  await delay(500);
+  const response = await request.delete(`/api/comments/${commentId}`);
   
-  // 查找并删除评论
-  for (const articleId in mockComments) {
-    const index = mockComments[articleId].findIndex(c => c.id === commentId);
-    if (index !== -1) {
-      mockComments[articleId].splice(index, 1);
-      return { data: { success: true } };
-    }
+  if (response.success) {
+    return { data: { success: true } };
+  } else {
+    throw new Error(response.message || '删除评论失败');
   }
-  
-  throw new Error('评论不存在');
 };
 
 export const useCommentStore = defineStore('comment', () => {
@@ -167,17 +103,56 @@ export const useCommentStore = defineStore('comment', () => {
   const loading = ref(false);
   const error = ref(null);
   
+  // 添加新评论到列表
+  const addNewComment = (newComment) => {
+    if (!newComment) return;
+    
+    console.log('添加新评论到列表:', newComment);
+    
+    // 将新评论添加到列表开头
+    comments.value = [newComment, ...comments.value];
+    // 更新总数
+    total.value += 1;
+    
+    // 清除可能存在的错误状态
+    error.value = null;
+  };
+  
   // 方法
   const fetchComments = async (articleId, params = {}) => {
     loading.value = true;
+    error.value = null;
+    
     try {
+      // 确保文章ID有效
+      if (!articleId) {
+        throw new Error('文章ID无效');
+      }
+      
+      console.log(`fetchComments调用，文章ID: ${articleId}, 类型: ${typeof articleId}`);
       const response = await getComments(articleId, params);
-      comments.value = response.data.comments;
-      total.value = response.data.total;
+      
+      if (response && response.data) {
+        comments.value = response.data.comments || [];
+        total.value = response.data.total || 0;
+        console.log(`获取到评论数据: ${comments.value.length} 条，总数: ${total.value}`);
+      } else {
+        // 保留现有评论数据，不清空
+        if (comments.value.length === 0) {
+          total.value = 0;
+        }
+        console.warn('评论API返回数据格式异常:', response);
+      }
+      
       loading.value = false;
       return Promise.resolve(response);
     } catch (error) {
-      error.value = error.message;
+      console.error('获取评论失败:', error);
+      // 保留现有评论数据，不清空
+      if (comments.value.length === 0) {
+        total.value = 0;
+      }
+      error.value = error.customMessage || error.message || '评论加载失败，请刷新页面重试';
       loading.value = false;
       return Promise.reject(error);
     }
@@ -260,6 +235,7 @@ export const useCommentStore = defineStore('comment', () => {
     fetchAdminComments,
     approveComment,
     rejectComment,
-    removeComment
+    removeComment,
+    addNewComment
   };
 });

@@ -7,10 +7,10 @@ services:
     container_name: blog-mysql-prod
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: qhdx2023-
       MYSQL_DATABASE: blog
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: root
+      MYSQL_PASSWORD: qhdx2023-
     ports:
       - "3306:3306"
     volumes:

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSettingStore } from '../store/setting';
 import { useResponsive, useScroll } from '../composables/useResponsive';
@@ -23,13 +23,19 @@ const isHeaderFixed = ref(false);
 // 移动端菜单状态
 const isMobileMenuOpen = ref(false);
 
-// 站点信息
-const siteInfo = ref({
-  siteName: '博客系统',
-  siteDescription: '一个现代化的博客系统',
-  siteLogo: '',
-  siteFooter: '© 2023 博客系统 All Rights Reserved.'
-});
+// 搜索框是否移动到右侧
+const isSearchMoved = ref(false);
+
+// 当前路由是否为搜索页面
+const isSearchPage = ref(false);
+
+// 站点信息 - 直接使用store中的计算属性
+const siteInfo = computed(() => ({
+  siteName: settingStore.siteName,
+  siteDescription: settingStore.siteDescription,
+  siteLogo: settingStore.siteLogo,
+  siteFooter: settingStore.siteFooter
+}));
 
 // 搜索关键词
 const searchKeyword = ref('');
@@ -70,9 +76,16 @@ const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
 
-// 监听滚动，控制头部固定
+// 监听滚动，控制头部固定和搜索框位置
 const handleScroll = () => {
   isHeaderFixed.value = scrollY.value > 100;
+  
+  // 在搜索页面且滚动超过200px时，将搜索框移动到右侧
+  if (isSearchPage.value && scrollY.value > 200) {
+    isSearchMoved.value = true;
+  } else {
+    isSearchMoved.value = false;
+  }
 };
 
 // 回到顶部
@@ -88,26 +101,41 @@ const handleClickOutside = (event) => {
   }
 };
 
+// 检查是否为搜索页面
+const checkSearchPage = () => {
+  isSearchPage.value = router.currentRoute.value.name === 'SearchResult';
+};
+
 // 获取站点设置
 onMounted(async () => {
+  console.log('开始获取站点设置...');
   try {
-    await settingStore.fetchSettings();
-    siteInfo.value = {
-      siteName: settingStore.siteName,
-      siteDescription: settingStore.siteDescription,
-      siteLogo: settingStore.siteLogo,
-      siteFooter: settingStore.siteFooter
-    };
+    const result = await settingStore.fetchSettings();
+    console.log('设置获取结果:', result);
+    console.log('当前设置数据:', settingStore.settings);
+    console.log('页脚信息:', settingStore.siteFooter);
   } catch (error) {
-    console.error('获取站点设置失败:', error);
+    console.warn('获取站点设置失败，使用默认设置:', error.message);
   }
+  
+  // 检查当前页面
+  checkSearchPage();
+  
+  // 添加滚动事件监听器
+  window.addEventListener('scroll', handleScroll);
   
   // 添加点击事件监听器
   document.addEventListener('click', handleClickOutside);
 });
 
+// 监听路由变化
+watch(() => router.currentRoute.value.name, () => {
+  checkSearchPage();
+});
+
 // 组件卸载时移除事件监听器
 onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
   document.removeEventListener('click', handleClickOutside);
 });
 </script>
@@ -115,7 +143,7 @@ onUnmounted(() => {
 <template>
   <div class="front-layout">
     <!-- 头部 -->
-    <header class="header" :class="{ 'header-fixed': isHeaderFixed }">
+    <header class="header" :class="{ 'header-fixed': isHeaderFixed, 'search-moved': isSearchMoved }">
       <div class="header-content container">
         <!-- Logo和站点名称 -->
         <div class="logo-container">
@@ -126,7 +154,7 @@ onUnmounted(() => {
         </div>
         
         <!-- 桌面端搜索框 -->
-        <div v-if="!isMobile" class="search-container">
+        <div v-if="!isMobile" class="search-container" :class="{ 'search-moved': isSearchMoved }">
           <el-input
             v-model="searchKeyword"
             placeholder="搜索文章..."
@@ -255,6 +283,25 @@ onUnmounted(() => {
 .search-container {
   flex: 0 0 300px;
   max-width: 400px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+/* 搜索框移动到右侧的样式 */
+.search-container.search-moved {
+  flex: 0 0 250px;
+  max-width: 250px;
+  margin-left: auto;
+  transform: translateX(0);
+}
+
+/* 头部在搜索移动状态下的布局调整 */
+.header.search-moved .header-content {
+  justify-content: space-between;
+}
+
+.header.search-moved .logo-container {
+  flex: 1;
 }
 
 .search-container .search-input {

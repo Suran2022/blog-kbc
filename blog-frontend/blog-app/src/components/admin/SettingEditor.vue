@@ -115,11 +115,22 @@ const saveSettings = async () => {
     saving.value = true;
     try {
       const settingData = { ...settingForm.value };
+      if (import.meta.env.DEV) {
+        console.log('准备保存设置数据:', settingData);
+        console.log('当前siteLogo值:', settingData.siteLogo);
+      }
+      
       await settingStore.updateSettings(settingData);
+      
+      if (import.meta.env.DEV) {
+        console.log('设置保存成功，当前store中的siteLogo:', settingStore.siteLogo);
+      }
       ElMessage.success('网站设置更新成功');
       emit('save-success');
     } catch (error) {
-      console.error('保存网站设置失败:', error);
+      if (import.meta.env.DEV) {
+        console.error('保存网站设置失败:', error);
+      }
       ElMessage.error('保存网站设置失败，请稍后重试');
     } finally {
       saving.value = false;

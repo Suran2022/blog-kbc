@@ -223,6 +223,20 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public PageResult<ArticleVO> searchArticles(String keyword, String tag, Integer page, Integer size, String sortBy, String sortDir) {
+        // 参数验证
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        if (size == null || size < 1) {
+            size = 10;
+        }
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            sortBy = "createTime";
+        }
+        if (sortDir == null || sortDir.trim().isEmpty()) {
+            sortDir = "desc";
+        }
+        
         // 创建分页对象
         Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);

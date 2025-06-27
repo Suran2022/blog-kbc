@@ -19,13 +19,13 @@ export default defineConfig({
     }
   },
   server: {
-    port: 8080,
+    port: 5173,
     open: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8081',
         changeOrigin: true,
-        // 不重写路径，因为后端已经配置了context-path为/api
+        // 不需要重写路径，因为后端已配置context-path为/api
         rewrite: (path) => path
       }
     }
